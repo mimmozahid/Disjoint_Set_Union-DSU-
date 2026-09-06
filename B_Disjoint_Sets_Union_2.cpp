@@ -5,34 +5,35 @@ using namespace __gnu_pbds;
 using namespace std;
 using ll = long long;
 #define MOD 998244353
-
 template <typename T> using pbds = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; 
 
 struct DSU
 {
     vector<int> par, rank, siz, mini, maxi;
     int component;
-    DSU (int n) : par(n+1, -1), rank (n+1, 0), siz (n+1, 1), component(n), mini(n+1, -1), maxi (n+1, -1)
+
+    DSU (int n) : par(n+1), rank(n+1, 0), siz(n+1, 1), component(n), mini(n+1, -1), maxi(n+1, -1)
     {
         for (int i = 1; i <= n; i++)
         {
             par[i] = i;
+            mini[i] = maxi[i] = i;
         }
     }
 
     int find (int i)
     {
-        return par[i] == i ? i : (par[i] = find (par[i]));
+        return (par[i] == i? i : (par[i] = find (par[i])));
+    }
+
+    int getSize (int u)
+    {
+        return siz[find(u)];
     }
 
     bool isSame (int u, int v)
     {
-        return (find (u) == find (v));
-    }
-
-    int getSize (int node)
-    {
-        return siz[find(node)];
+        return find (u) == find (v);
     }
 
     int cntComponent ()
@@ -42,14 +43,10 @@ struct DSU
 
     void _union (int u, int v)
     {
-        if ((u = find(u)) == (v = find(v)))
-        {
+        if ((v = find (v)) == (u = find (u)))
             return;
-        }
         else
-        {
             component--;
-        }
 
         if (rank[u] > rank[v])
         {
@@ -59,6 +56,7 @@ struct DSU
         {
             rank[v]++;
         }
+
         par[u] = par[v];
         siz[v] += siz[u];
         mini[v] = min (mini[v], mini[u]);
@@ -72,22 +70,26 @@ int main()
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     
-    int n, m; cin >> n >> m;
-    DSU d(n);
+    int n, m;
+    cin >> n >> m;
 
+    DSU d(n);
     for (int i = 0; i < m; i++)
     {
         string s;
-        int u, v;
-        cin >> s >> u >> v;
-
+        cin >> s;
         if (s == "union")
         {
-            d._union(u, v);
+            int u, v;
+            cin >> u >> v;
+            d._union (u, v);
         }
         else
         {
-            cout << (d.isSame (u, v) ? "YES" : "NO") << endl;
+            int v;
+            cin >> v;
+            v = d.find (v);
+            cout << d.mini[v] << " " << d.maxi[v] << " " << d.getSize(v) << endl;
         }
     }
     
